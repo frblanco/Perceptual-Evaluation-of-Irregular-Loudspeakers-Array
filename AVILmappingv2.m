@@ -1,4 +1,4 @@
-function [avil_file] = AVILmappingv2(placementArray,dmixFormat, stimulusName, placementIdx)
+function [avil_file] = AVILmappingv2(placementArray,dmixFormat, stimulusName)
 %DESCRIPTION: This function creates a 64 channel .wav file from a x channel file to be used in a 64 speakers dome which is part of AVIL lab at the Technical Danish University.
 %   The input is the filename that will be found in the directory and an
 %   array with the channel id, azimuth, elevation and distance in the dome.
@@ -15,19 +15,19 @@ function [avil_file] = AVILmappingv2(placementArray,dmixFormat, stimulusName, pl
 %% AVIL channel map
 %Here we have AVIL channel map with Channel_id, Azimuth and Elevation
 
-load('AVIL_channel_map.txt')
+load('AVIL_channel_map.txt');
 
 %% Importing audio file as an array
-c=01;
+c=1;
 for dmixIdx=1:length(dmixFormat)
     for stimulusIdx=1:length(stimulusName)
-        filename = cell2mat(['\inAudio__downmixes\'  (dmixFormat(dmixIdx)) '__' (stimulusName{stimulusIdx}) '__24lufs__correct_positioned.wav']);
+        filename = cell2mat(['\inAudio__downmixes\12ch_dmw-final\'  (dmixFormat(dmixIdx)) '__' (stimulusName{stimulusIdx}) '-30s__24lufs.wav']);
         [original_mix,Fs] = audioread(filename);
         if string(dmixFormat(dmixIdx)) == '12chn'
-            s=9;
+            s=11;
         elseif string(dmixFormat(dmixIdx)) == '5chn'
-            s=5;
-        elseif string(dmixFormat(dmixIdx)) == '5chn'
+            s=6;
+        elseif string(dmixFormat(dmixIdx)) == '2chn'
             s=1;
         end
         for h=s:1:s-1+size(placementArray,1)/3
@@ -64,6 +64,7 @@ for dmixIdx=1:length(dmixFormat)
                 LFE = original_mix(:,4);
                 original_mix (:,1) = original_mix (:,1) + 0.7079*LFE;
                 original_mix (:,2) = original_mix (:,2) + 0.7079*LFE;
+                original_mix(:,4)=0;
             end
             
             %% Distance simulation
@@ -75,7 +76,7 @@ for dmixIdx=1:length(dmixFormat)
             distancevector = placementArray(h).placement(:,4);
             norm = 1; %physical distance/radius of AVIL.
             
-            [new_mix,gain,delay] = distancesimulation(original_mix,Fs,distancevector,norm);
+            [new_mix,gain,delay] = distancesimulation(original_mix,Fs,distancevector,norm);          
             
             avil_file = zeros(length(new_mix),64); %creating an empty 64 channel array to route the right channels.
             
@@ -91,11 +92,21 @@ for dmixIdx=1:length(dmixFormat)
                 
                 channel(i,1) = AVIL_channel_map((AVIL_channel_map(:,2) == placementArray(h).placement(i,2) & AVIL_channel_map(:,3) == placementArray(h).placement(i,3)),1);
                 
-                avil_file(:,channel(i,1)) = new_mix(:,i);
+                avil_file(:,channel(i,1)) = avil_file(:,channel(i,1))+new_mix(:,i);
             end
             %% Rendering file
             folder = 'inAudio__64chn__downmixes\';
-            newfilename = ([folder '__' num2str(c) '__64chn__' char(dmixFormat(dmixIdx)) '__' char(stimulusName{stimulusIdx}) '.wav'])
+            
+            if(c<10)
+                newfilename = ([folder '00' num2str(c) '__64chn__' char(dmixFormat(dmixIdx)) '__' char(stimulusName{stimulusIdx}) '.wav'])
+    
+            
+            elseif(c>=10) && (c<100)
+                newfilename = ([folder '0' num2str(c) '__64chn__' char(dmixFormat(dmixIdx)) '__' char(stimulusName{stimulusIdx}) '.wav'])
+           
+            else
+                newfilename = ([folder num2str(c) '__64chn__' char(dmixFormat(dmixIdx)) '__' char(stimulusName{stimulusIdx}) '.wav'])
+            end 
             audiowrite(newfilename,avil_file,Fs);
             c=c+1;
             
