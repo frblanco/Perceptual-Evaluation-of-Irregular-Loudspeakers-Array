@@ -13,15 +13,17 @@ delay = zeros(n,1);
 %the relative distances intact
 distancevector = (norm - min(distancevector)) + distancevector;
 
+
+
 for i=1:n
-    gain(i) = 1/(distancevector(i)^2);
-    delay(i) = 1+(ceil((((distancevector(i)-1)/344))*Fs)); %delay in samples
+    gain(i) = ((1/(distancevector(i))));
+    delay(i) = (ceil((((distancevector(i)-norm)/344))*Fs)); %delay in samples
 end
 
 new_mix = zeros(length(original_mix) + max(delay),n); % new mix with the right sample size after the delay calculation
 
 for i=1:n
-    new_mix((delay(i)):delay(i)+length(original_mix)-1, i) = [gain(i).*original_mix(:,i)]; % Here I am zero padding and applying gain to each channel individually.  
+    new_mix(delay(i)+1:(delay(i)+length(original_mix)), i) = [gain(i).*original_mix(:,i)]; % Here I am zero padding and applying gain to each channel individually.  
 end
 
 end
