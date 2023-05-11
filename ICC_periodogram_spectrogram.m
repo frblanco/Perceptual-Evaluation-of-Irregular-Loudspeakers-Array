@@ -6,7 +6,7 @@ close all
 %addpath('inAudio__downmixes\12ch_dmw-final')
 inAudioPath = 'inAudio__downmixes\12ch_dmw-final\*.wav';
 s=dir(inAudioPath);
-mov_win = 100;
+mov_win = 50;
 fftsize = 2048;
 titles = {'Excerpt 1 - 2chn','Excerpt 2 - 2chn','Excerpt 3 - 2chn','Excerpt 4 - 2chn','Excerpt 1 - 5chn','Excerpt 2 - 5chn','Excerpt 3 - 5chn','Excerpt 4 - 5chn','Excerpt 1 - 12chn','Excerpt 2 - 12chn','Excerpt 3 - 12chn','Excerpt 4 - 12chn'};
 for i=1:length(s)
@@ -30,8 +30,8 @@ for i=1:length(s)
     end
     
     %rms
-    E(i,2)=(mean(cell2mat(f_chn(i))))./(mean(cell2mat(b_chn(i))));%front/back
-    E(i,3)=(mean(cell2mat(l_chn(i))))./(mean(cell2mat(r_chn(i))));%left/right
+    E(i,2)= rms(xcorr(cell2mat(f_chn(i)),cell2mat(b_chn(i)),'normalized'));%front/back
+    E(i,3)=rms(xcorr(cell2mat(l_chn(i)),cell2mat(r_chn(i)),'normalized'));%left/right
    
     %cross correlation
     [c,lags] = xcorr(cell2mat(f_chn(i)),cell2mat(b_chn(i)),'normalized');%front/back
@@ -47,86 +47,90 @@ for i=1:length(s)
     
     end
     %Periodgram'
- 
-    for i=1:4
-    figure(1)
-     subplot(2,2,i)
-     set(gcf,'color','w');
-    set(gca,'fontsize', 14);
-    N =length(cell2mat(l_chn(i)));
+
+excerpt_idx = [1 5 9, 
+			  2 6 10,
+			  3 7 11,
+			  4 8 12];
+ N =length(cell2mat(l_chn(i)));
     window = hann(N);
-    [pxxl,f] = periodogram((cell2mat(l_chn(i))),window,fftsize,fs);
-    [pxxr,f] = periodogram((cell2mat(r_chn(i))),window,fftsize,fs);
-    plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
-    xlabel('Hz')
-    ylabel('dB/Hz')
-    title(['Periodogram of ' titles{i}])
-    legend('Left zone','Right Zone')
-    end
-  for i=5:8
-      
-        N =length(cell2mat(l_chn(i)));
-        window = hann(N);
-        figure(2)
-           subplot(2,2,i-4)
-        set(gcf,'color','w');
-    set(gca,'fontsize', 14);
-        [pxxl,f] = periodogram((cell2mat(l_chn(i))),window,fftsize,fs);
-        [pxxr,f] = periodogram((cell2mat(r_chn(i))),window,fftsize,fs);
-        plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
-        xlabel('Hz')
-        ylabel('dB/Hz')
-        title(['Periodogram of ' titles{i}])
-        legend('Left zone','Right Zone')
-        figure(3)
-        subplot(2,2,i-4) 
-        set(gcf,'color','w');
-        set(gca,'fontsize', 14);
-        [pxxb,f] = periodogram(((rms(cell2mat(b_chn(i)),2))),window,fftsize,fs);
-        [pxxf,f] = periodogram(((rms(cell2mat(f_chn(i)),2))),window,fftsize,fs);
-        plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
-        xlabel('Hz')
-        ylabel('dB/Hz')
-        title(['Periodogram of ' titles{i}])
-        legend('Front Zone','Rear Zone')
-      end
+for j=1:1:4
+figure(j)
+subplot(3,2,1)
+%2channel right vs left  - 
+ N =length(cell2mat(l_chn(excerpt_idx(j,1))));
+ window = hann(N);
+[pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,1),1))),window,fftsize,fs);
+[pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,1),1))),window,fftsize,fs);
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+set(gcf,'color','w');
+set(gca,'fontsize', 14);
+xlabel('Hz')
+ylabel('dB/Hz')
+ title(['2 chn - Excerpt ' num2str(j)])
+legend('Left zone','Right Zone')
+
+subplot(3,2,3)
+%5 channel right vs left -
+ N =length(cell2mat(l_chn(excerpt_idx(j,2))));
+ window = hann(N);
+[pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
+[pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+set(gcf,'color','w');
+set(gca,'fontsize', 14);
+xlabel('Hz')
+ylabel('dB/Hz')
+ title(['5 chn - Excerpt ' num2str(j)])
+legend('Left zone','Right Zone')
+
+
+subplot(3,2,5)
+%12 channel right vs left -
+ N =length(cell2mat(l_chn(excerpt_idx(j,3))));
+ window = hann(N);
+[pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
+[pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+set(gcf,'color','w');
+set(gca,'fontsize', 14);
+xlabel('Hz')
+ylabel('dB/Hz')
+ title(['12 chn - Excerpt ' num2str(j)])
+legend('Left zone','Right Zone')
+
+subplot(3,2,2)
+%5 channel front vs rear -
+N =length(cell2mat(b_chn(excerpt_idx(j,2))));
+ window = hann(N);
+[pxxb,f] = periodogram((cell2mat(b_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
+[pxxf,f] = periodogram((cell2mat(f_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
+plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
+set(gcf,'color','w');
+set(gca,'fontsize', 14);
+xlabel('Hz')
+ylabel('dB/Hz')
+ title(['12 chn - Excerpt ' num2str(j)])
+legend('Rear zone',' Rear Zone')
 
 
 
+subplot(3,2,4)
+%12 channel front vs rear - 
+N =length(cell2mat(b_chn(excerpt_idx(j,3))));
+ window = hann(N);
+[pxxb,f] = periodogram((cell2mat(b_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
+[pxxf,f] = periodogram((cell2mat(f_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
+plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
+set(gcf,'color','w');
+set(gca,'fontsize', 14);
+xlabel('Hz')
+ylabel('dB/Hz')
+ title(['12 chn - Excerpt ' num2str(j)])
+legend('Rear zone',' Rear Zone')
+end
 
-  for i=9:12
         
-        N =length(cell2mat(l_chn(i)));
-        window = hann(N);
-        figure(4)
-        subplot(2,2,i-8)        
-        set(gcf,'color','w');
-        set(gca,'fontsize', 14);
-        [pxxl,f] = periodogram((cell2mat(l_chn(i))),window,fftsize,fs);
-        [pxxr,f] = periodogram((cell2mat(r_chn(i))),window,fftsize,fs);
-        plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
-        xlabel('Hz')
-        ylabel('dB/Hz')
-        title(['Periodogram of ' titles{i}])
-        legend('Left zone','Right Zone')
-        figure(5)
-        subplot(2,2,i-8) 
-        set(gcf,'color','w');
-        set(gca,'fontsize', 14);
-        [pxxb,f] = periodogram(((rms(cell2mat(b_chn(i)),2))),window,fftsize,fs);
-        [pxxf,f] = periodogram(((rms(cell2mat(f_chn(i)),2))),window,fftsize,fs);
-        plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
-        xlabel('Hz')
-        ylabel('dB/Hz')
-        title(['Periodogram of ' titles{i}])
-        legend('Front Zone','Rear Zone')
-      end
-
-
-
-
-
-
 %% Spectrogram
 % 
  titles ={'2chn Excerpt 1','2chn Excerpt 2','2chn Excerpt 3','2chn Excerpt 4','5chn Excerpt 1','5chn Excerpt 2','5chn Excerpt 3','5chn Excerpt 4','12chn Excerpt 1','12chn Excerpt 2','12chn Excerpt 3','12chn Excerpt 4'};
