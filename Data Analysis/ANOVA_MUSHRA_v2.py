@@ -24,6 +24,14 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy.stats import shapiro
 from scipy.stats import mannwhitneyu
 
+def normalize(arr):
+    norm_arr = []
+    diff_arr = max(arr) - min(arr)   
+    for i in arr:
+        temp = ((i - min(arr))/diff_arr)
+        norm_arr.append(temp)
+    return norm_arr
+
 #% Data reading
 # print(f"File location using __file__ variable: {os.path.realpath(os.path.dirname('ANOVA_MUSHRA.py'))}")print(f"File location using __file__ variable: {os.path.realpath(os.path.dirname('ANOVA_MUSHRA.py'))}")
 # absolute path, using \ and r prefix
@@ -154,7 +162,6 @@ gx=plt.errorbar(np.arange(0, listeners.size),mean_Env,yerr=np.array(Env_yerr).fl
 plt.ylim(0,100)
 plt.legend(loc='lower right')
 
-plt.show()
 plt.show()
 
 
@@ -438,6 +445,9 @@ shapiro(data_label_melt['Envelopment'])
 y=data_label_melt[data_label_melt["Envelopment"] != 100]
 shapiro(y['Envelopment'])
 shapiro((np.power(y['Envelopment'],2)))
+
+
+y=normalize(np.array(data_label_melt['Envelopment']),np.min(np.array(data_label_melt['Envelopment'])),np.max(np.array(data_label_melt['Envelopment'])))
 y=data_label_melt[(data_label_melt["Envelopment"] != 100) & (data_label_melt["Loudspeaker_layout"] != 'Reference') ]
 
 ###Mann-Whitney U test
