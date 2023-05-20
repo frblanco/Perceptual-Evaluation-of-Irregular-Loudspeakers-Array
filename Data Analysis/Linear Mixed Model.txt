@@ -1,0 +1,29 @@
+======================================================================================================================
+Model:                                     MixedLM                          Dependent Variable:                          BAQ       
+No. Observations:                          384                              Method:                                      REML      
+No. Groups:                                8                                Scale:                                       210.5275  
+Min. group size:                           48                               Log-Likelihood:                              -1433.4912
+Max. group size:                           48                               Converged:                                   Yes       
+Mean group size:                           48.0                                                                                    
+-----------------------------------------------------------------------------------------------------------------------------------
+                                                                                        Coef.  Std.Err.   z    P>|z|  [0.025 0.975]
+-----------------------------------------------------------------------------------------------------------------------------------
+Intercept                                                                               79.000    5.594 14.122 0.000  68.036 89.964
+C(Loudspeaker_layout)[T.Distance Dist.]                                                -19.375    7.255 -2.671 0.008 -33.594 -5.156
+                      Mixed Linear Model Regression Results
+=================================================================================
+Model:                     MixedLM         Dependent Variable:         BAQ       
+No. Observations:          384             Method:                     REML      
+No. Groups:                8               Scale:                      264.6796  
+Min. group size:           48              Log-Likelihood:             -1615.5287
+Max. group size:           48              Converged:                  Yes       
+Mean group size:           48.0                                                  
+---------------------------------------------------------------------------------
+                                      Coef.  Std.Err.   z    P>|z| [0.025  0.975]
+---------------------------------------------------------------------------------
+C(Loudspeaker_layout)[Angular Dist.]  70.510    2.755 25.590 0.000 65.110  75.911
+C(Loudspeaker_layout)[Distance Dist.] 45.510    2.755 16.517 0.000 40.110  50.911
+C(Loudspeaker_layout)[Mixed Dist.]    53.687    2.755 19.484 0.000 48.287  59.088
+C(Loudspeaker_layout)[Reference]      98.635    2.755 35.797 0.000 93.235 104.036
+Listener Var                          38.681    1.466                            
+=============================================================================

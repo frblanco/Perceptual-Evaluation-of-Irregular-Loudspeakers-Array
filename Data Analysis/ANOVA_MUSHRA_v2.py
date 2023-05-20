@@ -421,7 +421,7 @@ sns.catplot(data=data_label_melt,x='Loudspeaker_layout',y='Envelopment',hue='Exc
 #%%
 sns.set_theme(style="whitegrid")
 #sns.pointplot(data=data_label_melt,x='Loudspeaker_layout',y='Envelopment',hue='Channel',errorbar='ci,95')
-gx=sns.catplot(data=dataBAQ_label_melt,x='Loudspeaker_layout',y='BAQ',hue='Excerpt',col='Channel',capsize=.2, palette="YlGnBu_d", errorbar="ci,95",
+gx=sns.catplot(data=dataBAQ_label_melt,x='Loudspeaker_layout',y='BAQ',hue='Listener',col='Channel',capsize=.2, palette="YlGnBu_d", errorbar="ci,95",
     kind="point", height=6, aspect=.75,).despine(left=True)
 #%%
 fx= sns.pointplot(data=dataBAQ_label_melt,x='Loudspeaker_layout',y='BAQ',hue='Excerpt',capsize=.2, palette="YlGnBu_d", errorbar="ci,95", height=6, aspect=.75,)

@@ -351,14 +351,37 @@ result=mannwhitneyu(groupC.BAQ,groupD.BAQ,alternative='two-sided',method='exact'
 print(result)
 #%% Linear mixed effect model 
 
-mdf = smf.mixedlm("""BAQ ~ C(Listener)""", y_BAQ_norm,groups="Channel").fit()
+mdf = smf.mixedlm("""BAQ ~ -1 + C(Loudspeaker_layout)""", y_BAQ_norm,groups="Listener").fit()
 
 
 print(mdf.summary())
-plt.scatter(y_BAQ_norm['BAQ'] - mdf.resid, mdf.resid, alpha = 0.5)
+plt.scatter(mdf.resid, mdf.fittedvalues, alpha = 0.5)
 plt.title("Residual vs. Fitted in Python")
 plt.xlabel("Fitted Values")
 plt.ylabel("Residuals")
 plt.savefig('python_plot.png',dpi=300)
 plt.show()
 
+fig = plt.figure(figsize = (16, 9))
+
+ax = sns.distplot(mdf.resid, hist = False, kde_kws = {"shade" : True, "lw": 1}, fit = stats.norm)
+ax.set_title("KDE Plot of Model Residuals (Blue) and Normal Distribution (Black)")
+ax.set_xlabel("Residuals")
+
+## Q-Q PLot
+
+fig = plt.figure(figsize = (16, 9))
+ax = fig.add_subplot(111)
+sm.qqplot(mdf.resid, dist = stats.norm, line = 's', ax = ax)
+
+ax.set_title("Q-Q Plot")
+#%% Export data to .txt
+data = y_Env
+data['BAQ'] = y_BAQ['BAQ']
+
+path =r"C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Special Course\Three Driver Speaker arrangement to improve spatial awareness\Development\Special-Project\Result-Analysis\Data Analysis\data.txt"
+data.to_csv(path,header=True,sep=',',index=False)
+# with open(path,'a') as f:
+#     data_string = data.to_string(index=False)
+#     f.write(data_string)
+    
