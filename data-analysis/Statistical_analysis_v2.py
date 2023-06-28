@@ -183,6 +183,75 @@ plt.xlabel('BAQ')
 plt.ylabel('Frequency')
 plt.show()
 
+
+#%% Box plots
+##Envelopmentc
+sns.set_theme(style="whitegrid")
+ax = sns.boxplot(y='Envelopment', x="Loudspeaker_layout",
+                 data=data_label_melt)
+ax = sns.swarmplot(y='Envelopment', x='Loudspeaker_layout',
+                   data=data_label_melt)
+plt.savefig('boxplot-Envelopment-Loudspeaker_layout.png')
+plt.show()
+bx = sns.boxplot(y='Envelopment', x='Excerpt',
+                 data=data_label_melt, color='#99c2a2')
+bx = sns.swarmplot(y='Envelopment', x='Excerpt',
+                   data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot-Envelopment-Excerpt.png')
+plt.show()
+cx = sns.boxplot(y='Envelopment', x='Channel',
+                 data=data_label_melt, color='#99c2a2')
+cx = sns.swarmplot(y='Envelopment', x='Channel',
+                   data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot-Envelopment-Channel.png')
+plt.show()
+
+dx = sns.boxplot(y='Envelopment', x='Excerpt',
+                 hue="Loudspeaker_layout",  data=data_label_melt)
+# ax = sns.swarmplot(y='Envelopment',x='Loudspeaker_layout', data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot2_Envelopment_Excerpt-layout.png')
+plt.show()
+
+ex = sns.boxplot(y='Envelopment', x='Excerpt',
+                 hue='Channel', data=data_label_melt)
+# bx = sns.swarmplot(y='Envelopment',x='Excerpt', data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot2_Envelopment_Excerpt-Channel.png')
+plt.show()
+
+
+##BAQ##
+
+# Create boxplot per independent variable
+ax = sns.boxplot(y='BAQ', x='Loudspeaker_layout',
+                 data=dataBAQ_label_melt, color='#99c2a2')
+ax = sns.swarmplot(y='BAQ', x='Loudspeaker_layout',
+                   data=dataBAQ_label_melt, color='#7d0013')
+plt.savefig('boxplot-BAQ-Loudspeaker_layout.png')
+plt.show()
+bx = sns.boxplot(y='BAQ', x='Excerpt',
+                 data=dataBAQ_label_melt, color='#99c2a2')
+bx = sns.swarmplot(y='BAQ', x='Excerpt',
+                   data=dataBAQ_label_melt, color='#7d0013')
+plt.savefig('boxplot-BAQ-Excerpt.png')
+plt.show()
+cx = sns.boxplot(y='BAQ', x='Channel',
+                 data=dataBAQ_label_melt, color='#99c2a2')
+cx = sns.swarmplot(y='BAQ', x='Channel',
+                   data=dataBAQ_label_melt, color='#7d0013')
+plt.savefig('boxplot-BAQ-Channel.png')
+plt.show()
+
+dx = sns.boxplot(y='BAQ', x='Excerpt',
+                 hue="Loudspeaker_layout",  data=dataBAQ_label_melt)
+# ax = sns.swarmplot(y='Envelopment',x='Loudspeaker_layout', data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot2_BAQ_Excerpt-layout.png')
+plt.show()
+ex = sns.boxplot(y='BAQ', x='Excerpt', hue='Channel', data=dataBAQ_label_melt)
+# bx = sns.swarmplot(y='Envelopment',x='Excerpt', data=data_label_melt, color='#7d0013')
+plt.savefig('boxplot2_BAQ_Excerpt-Channel.png')
+plt.show()
+    
+
 #%% Participants rating behaviour/ Which excerpt did my participants missidentified the reference
 sns.set_style("whitegrid")
 
