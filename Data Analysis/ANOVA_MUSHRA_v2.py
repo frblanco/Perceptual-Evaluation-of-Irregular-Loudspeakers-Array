@@ -203,41 +203,6 @@ for f in listeners_remove:
     dataBAQ_label_melt=dataBAQ_label_melt[dataBAQ_label_melt.Listener != int(f)]
     listeners =np.delete(listeners,np.where(listeners == int(f)))
    
-#%% Plot the Reference identified per test page to evaluate traning effects.
-
-
-##
-
-##
-participants = len(filenames)
-listeners = [np.arange(0, participants)]
-listeners=np.array(np.delete(listeners,listeners_remove))
-x1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12];
-y = data_label_melt[['Loudspeaker_layout', 'Envelopment', 'Listener']]
-
-plt.figure()
-count=0;
-for f in listeners:
-        ya=(y.loc[(y['Listener'] == f) & (y['Loudspeaker_layout'] == 'Reference')])
-        ya['Excerpt presentation'] = x1;
-        plt.xlabel('Test pages')
-        plt.ylabel('Hidden Reference Env. Rating')
-        gx=plt.plot(np.array(ya['Excerpt presentation']),np.array(ya['Envelopment']),marker='d', label='Listener ' + str(count))
-        count=count+1;
-plt.legend(loc="lower right")
- 
-
-y1 = dataBAQ_label_melt[['Loudspeaker_layout', 'BAQ', 'Listener']]
-plt.figure()
-count=0;
-for f in listeners:
-        yb=(y1.loc[(y['Listener'] == f) & (y1['Loudspeaker_layout'] == 'Reference')])
-        yb['Excerpt presentation'] = x1;
-        plt.xlabel('Test pages')
-        plt.ylabel('Hidden Reference BAQ Rating')
-        gx=plt.plot(np.array(yb['Excerpt presentation']),np.array(yb['BAQ']),marker='d', label='Listener ' + str(count))
-        count=count+1;
-plt.legend(loc="lower right")
 
 #%% Box plots
 ##Envelopmentc
@@ -245,7 +210,7 @@ sns.set_theme(style="whitegrid")
 ax = sns.boxplot(y='Envelopment', x="Loudspeaker_layout",
                  data=data_label_melt)
 ax = sns.swarmplot(y='Envelopment', x='Loudspeaker_layout',
-                   data=data_label_melt, color='#7d0013')
+                   data=data_label_melt)
 plt.savefig('boxplot-Envelopment-Loudspeaker_layout.png')
 plt.show()
 bx = sns.boxplot(y='Envelopment', x='Excerpt',
@@ -313,7 +278,7 @@ model1 = ols("""Envelopment ~ C(Loudspeaker_layout) + C(Excerpt) + C(Channel) +
                C(Loudspeaker_layout):C(Excerpt) + C(Loudspeaker_layout):C(Channel) + C(Excerpt):C(Channel) +
                C(Loudspeaker_layout):C(Excerpt):C(Channel)""", data=data_label_melt).fit()
 # perform ANOVA
-ANOVA_summary15 = sm.stats.anova_lm(model1, typ=2)
+ANOVA_summary1 = sm.stats.anova_lm(model1, typ=2)
 print(ANOVA_summary1)
 
 #%%

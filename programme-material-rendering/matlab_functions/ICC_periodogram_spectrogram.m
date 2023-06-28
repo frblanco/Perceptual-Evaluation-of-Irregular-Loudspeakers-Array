@@ -4,11 +4,11 @@ close all
 
 
 %addpath('inAudio__downmixes\12ch_dmw-final')
-inAudioPath = 'inAudio__downmixes\12ch_dmw-final\*.wav';
+%inAudioPath = 'inAudio__downmixes\12ch_dmw-final\*.wav';
+inAudioPath = 'Program_material_selection\*.wav';
 s=dir(inAudioPath);
 mov_win = 50;
 fftsize = 2048;
-titles = {'Excerpt 1 - 2chn','Excerpt 2 - 2chn','Excerpt 3 - 2chn','Excerpt 4 - 2chn','Excerpt 1 - 5chn','Excerpt 2 - 5chn','Excerpt 3 - 5chn','Excerpt 4 - 5chn','Excerpt 1 - 12chn','Excerpt 2 - 12chn','Excerpt 3 - 12chn','Excerpt 4 - 12chn'};
 for i=1:length(s)
     Ename(i,1) =string(s(i).name);
     [data,fs]=audioread([s(i).folder '\' s(i).name]);
@@ -30,8 +30,8 @@ for i=1:length(s)
     end
     
     %rms
-    E(i,2)= rms(xcorr(cell2mat(f_chn(i)),cell2mat(b_chn(i)),'normalized'));%front/back
-    E(i,3)=rms(xcorr(cell2mat(l_chn(i)),cell2mat(r_chn(i)),'normalized'));%left/right
+    E(i,2)= rms(cell2mat(f_chn(i)))/rms(cell2mat(b_chn(i)));%front/back
+    E(i,3)=rms(cell2mat(l_chn(i)))/rms(cell2mat(r_chn(i)));%left/right
    
     %cross correlation
     [c,lags] = xcorr(cell2mat(f_chn(i)),cell2mat(b_chn(i)),'normalized');%front/back
@@ -45,9 +45,11 @@ for i=1:length(s)
         E(i,3)=0;
     end
     
-    end
-    %Periodgram'
+end
+    
 
+ %% Periodgram'
+titles = {'Excerpt 1 - 2chn','Excerpt 2 - 2chn','Excerpt 3 - 2chn','Excerpt 4 - 2chn','Excerpt 1 - 5chn','Excerpt 2 - 5chn','Excerpt 3 - 5chn','Excerpt 4 - 5chn','Excerpt 1 - 12chn','Excerpt 2 - 12chn','Excerpt 3 - 12chn','Excerpt 4 - 12chn'};
 excerpt_idx = [1 5 9, 
 			  2 6 10,
 			  3 7 11,
@@ -62,7 +64,8 @@ subplot(3,2,1)
  window = hann(N);
 [pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,1),1))),window,fftsize,fs);
 [pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,1),1))),window,fftsize,fs);
-plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r');
+ylim([-120 -60])
 set(gcf,'color','w');
 set(gca,'fontsize', 14);
 xlabel('Hz')
@@ -76,7 +79,8 @@ subplot(3,2,3)
  window = hann(N);
 [pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
 [pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
-plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r');
+ylim([-120 -60]);
 set(gcf,'color','w');
 set(gca,'fontsize', 14);
 xlabel('Hz')
@@ -85,13 +89,14 @@ ylabel('dB/Hz')
 legend('Left zone','Right Zone')
 
 
-subplot(3,2,5)
+subplot(3,2,5.5)
 %12 channel right vs left -
  N =length(cell2mat(l_chn(excerpt_idx(j,3))));
  window = hann(N);
 [pxxl,f] = periodogram((cell2mat(l_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
 [pxxr,f] = periodogram((cell2mat(r_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
-plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r')
+plot(f,movmean(10*log10(pxxl),mov_win),'g',f,movmean(10*log10(pxxr),mov_win),'r');
+ylim([-120 -60])
 set(gcf,'color','w');
 set(gca,'fontsize', 14);
 xlabel('Hz')
@@ -105,7 +110,8 @@ N =length(cell2mat(b_chn(excerpt_idx(j,2))));
  window = hann(N);
 [pxxb,f] = periodogram((cell2mat(b_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
 [pxxf,f] = periodogram((cell2mat(f_chn(excerpt_idx(j,2),1))),window,fftsize,fs);
-plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
+plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r');
+ylim([-120 -60])
 set(gcf,'color','w');
 set(gca,'fontsize', 14);
 xlabel('Hz')
@@ -121,7 +127,8 @@ N =length(cell2mat(b_chn(excerpt_idx(j,3))));
  window = hann(N);
 [pxxb,f] = periodogram((cell2mat(b_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
 [pxxf,f] = periodogram((cell2mat(f_chn(excerpt_idx(j,3),1))),window,fftsize,fs);
-plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r')
+plot(f,movmean(10*log10(pxxb),mov_win),'g',f,movmean(10*log10(pxxf),mov_win),'r');
+ylim([-120 -60])
 set(gcf,'color','w');
 set(gca,'fontsize', 14);
 xlabel('Hz')

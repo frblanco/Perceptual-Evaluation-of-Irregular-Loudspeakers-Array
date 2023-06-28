@@ -1,4 +1,4 @@
-function [new_mix,gain,delay] = distancesimulation(original_mix,Fs,distancevector,norm)
+    function [new_mix,gain,delay] = distancesimulation(original_mix,Fs,distancevector,norm)
 %% Distance simulation
 % Here attenuation and delay will be applied to simulate different speaker
 % distance. The inverse square law is used and the source is considered to

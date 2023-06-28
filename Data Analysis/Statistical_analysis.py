@@ -37,6 +37,7 @@ def normalize(arr):
 os.chdir(r"C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Special Course\Three Driver Speaker arrangement to improve spatial awareness\Development\Special-Project\Result-Analysis\Data Analysis")
 # load txt files to label all values. To fit for a stats model
 labels = np.loadtxt('naming.txt', dtype=str, delimiter=',', usecols=(0, 1, 2))
+errors = np.loadtxt('positional_error.txt', dtype=float, delimiter=',', usecols=(0, 1))
 
 ###read the .txt files and create a data frame - Envelopment###
 # absolute path, using \ and r prefix
@@ -52,11 +53,13 @@ dataEnv = [np.loadtxt(file, skiprows=1, delimiter=' ', max_rows=48, usecols=(3),
 dataf = pd.DataFrame(np.transpose(np.array(dataEnv)))
 data_label = dataf.assign(
     Channel=labels[:, 0], Excerpt=labels[:, 1], Loudspeaker_layout=labels[:, 2])
+data_label["Azimuth Error"]=errors[:, 0]
+data_label["Distance Error"]=errors[:, 1]
 
 # reshape the d dataframe suitable for statsmodels package using pd.melt
 var = np.linspace(0, (len(filenames)-1), (len(filenames)))
 data_label_melt = pd.melt(data_label, id_vars=[
-                          'Loudspeaker_layout', 'Channel', 'Excerpt'], value_vars=var, value_name='Envelopment')
+                          'Loudspeaker_layout', 'Channel', 'Excerpt','Azimuth Error','Distance Error'], value_vars=var, value_name='Envelopment')
 
 data_label_melt.rename(columns={'variable': 'Listener'}, inplace=True)
 
@@ -71,10 +74,12 @@ dataBAQ = [np.loadtxt(file, skiprows=1, delimiter=' ', max_rows=48, usecols=(3),
 dataBAQf = pd.DataFrame(np.transpose(np.array(dataBAQ)))
 dataBAQ_label = dataBAQf.assign(
     Channel=labels[:, 0], Excerpt=labels[:, 1], Loudspeaker_layout=labels[:, 2])
+dataBAQ_label["Azimuth Error"]=errors[:,0]
+dataBAQ_label["Distance Error"]=errors[:,1]
 # reshape the d dataframe suitable for statsmodels package
 var = np.linspace(0, (len(filenames)-1), (len(filenames)))
 dataBAQ_label_melt = pd.melt(dataBAQ_label, id_vars=[
-                             'Loudspeaker_layout', 'Channel', 'Excerpt'], value_vars=var, value_name='BAQ')
+                             'Loudspeaker_layout', 'Channel', 'Excerpt','Azimuth Error','Distance Error'], value_vars=var, value_name='BAQ')
 dataBAQ_label_melt.rename(columns={'variable': 'Listener'}, inplace=True)
 
 presentation_order = np.array([['BAQ,Env.',
@@ -121,11 +126,11 @@ Ref_eff_dataframe = pd.DataFrame(np.r_[HitReference_BAQ_p,HitReference_Env_p])
 
 
 Ref_eff_dataframe.rename(columns={0: 'Hidden Reference Identified %', 1: 'Attribute', 2: 'Listener',3: 'Presentation Order' }, inplace=True)
-gx = sns.boxplot(y=Ref_eff_dataframe['Hidden Reference Identified %'].astype(float), x='Presentation Order', hue='Attribute',
+gx = sns.barplot(y=Ref_eff_dataframe['Hidden Reference Identified %'].astype(float), x='Presentation Order', hue='Attribute',
                  data=Ref_eff_dataframe)
 plt.ylim(0,100)
 plt.show()
-gx = sns.barplot(y=Ref_eff_dataframe['Hidden Reference Identified %'].astype(float), x='Listener', hue='Attribute',
+hx = sns.barplot(y=Ref_eff_dataframe['Hidden Reference Identified %'].astype(float), x='Listener', hue='Attribute',
                  data=Ref_eff_dataframe)
 plt.ylim(0,100)
 plt.show()
@@ -159,7 +164,30 @@ plt.xlabel('BAQ')
 plt.ylabel('Frequency')
 plt.show()
 
+#%% Participants rating behaviour
+#Envelopment
+ex = sns.boxplot(y='Envelopment', x='Listener',
+                  data=data_label_melt)
+plt.savefig('boxplot2_Envelopment_Excerpt-Channel.png')
+plt.show()
 
+y_Env=data_label_melt[(data_label_melt["Loudspeaker_layout"] == 'Reference') ]
+ex = sns.boxplot(y='Envelopment', x='Listener', hue='Excerpt',
+                  data=y_Env)
+
+plt.show()
+
+#Envelopment
+fx = sns.boxplot(y='Envelopment', x='Listener',
+                  data=data_label_melt)
+plt.savefig('boxplot2_Envelopment_Excerpt-Channel.png')
+plt.show()
+
+y_BAQ=dataBAQ_label_melt[(dataBAQ_label_melt["Loudspeaker_layout"] == 'Reference') ]
+fx = sns.boxplot(y='BAQ', x='Listener', hue='Excerpt',
+                  data=y_BAQ)
+
+plt.show()
 #%%second test of normality. Just took the 100 values and references-
 
 y_Env=data_label_melt[(data_label_melt["Envelopment"] != 100) & (data_label_melt["Loudspeaker_layout"] != 'Reference') ]
@@ -232,34 +260,34 @@ y_BAQ_norm=dataBAQ_label_melt
 data_group1c = y_Env_norm[y_Env_norm['Channel']=='2chn']
 data_group2c = y_Env_norm[y_Env_norm['Channel']=='5chn']
 data_group3c = y_Env_norm[y_Env_norm['Channel']=='12chn']
-result = stats.kruskal(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment)
+result = stats.friedmanchisquare(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment)
 print(result)
 #for loudspeaker layout 
 data_group1l = y_Env_norm[y_Env_norm['Loudspeaker_layout'] == 'Angular Dist.']
 data_group2l = y_Env_norm[y_Env_norm['Loudspeaker_layout'] == 'Distance Dist.']
 data_group3l = y_Env_norm[y_Env_norm['Loudspeaker_layout'] == 'Mixed Dist.']
 data_group4l = y_Env_norm[y_Env_norm['Loudspeaker_layout'] == 'Reference']
-result = stats.kruskal(data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment)
+result = stats.friedmanchisquare(data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment)
 print(result)
 #for Excerpt
 data_group1e = y_Env_norm[y_Env_norm['Excerpt'] == 'Poorly Corr.']
 data_group2e = y_Env_norm[y_Env_norm['Excerpt'] == 'Transient']
 data_group3e = y_Env_norm[y_Env_norm['Excerpt'] == 'Highly Corr.(P)']
 data_group4e = y_Env_norm[y_Env_norm['Excerpt'] == 'Highly Corr.(J)']
-result = stats.kruskal(data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
+result = stats.friedmanchisquare(data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
 print(result)
-#A:B
-result = stats.kruskal(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment,data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment)
-print(result)
-#A:C
-result = stats.kruskal(data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment,data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment)
-print(result)
-#B:C
-result = stats.kruskal(data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment,data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
-print(result)
-#A:B:C
-result = stats.kruskal(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment,data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment,data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
-print(result)
+# #A:B
+# result = stats.friedmanchisquare(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment,data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment)
+# print(result)
+# #A:C
+# result = stats.friedmanchisquare(data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment,data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment)
+# print(result)
+# #B:C
+# result = stats.friedmanchisquare(data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment,data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
+# print(result)
+# #A:B:C
+# result = stats.friedmanchisquare(data_group1c.Envelopment, data_group2c.Envelopment,data_group3c.Envelopment,data_group1l.Envelopment, data_group2l.Envelopment,data_group3l.Envelopment,data_group4l.Envelopment,data_group1e.Envelopment, data_group2e.Envelopment,data_group3e.Envelopment,data_group4e.Envelopment)
+# print(result)
 
 
 
@@ -268,35 +296,35 @@ print(result)
 data_group1c = y_BAQ_norm[y_BAQ_norm['Channel']=='2chn']
 data_group2c= y_BAQ_norm[y_BAQ_norm['Channel']=='5chn']
 data_group3c = y_BAQ_norm[y_BAQ_norm['Channel']=='12chn']
-result = stats.kruskal(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ)
+result = stats.friedmanchisquare(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ)
 print(result)
 #for loudspeaker layout 
 data_group1l = y_BAQ_norm[y_BAQ_norm['Loudspeaker_layout'] == 'Angular Dist.']
 data_group2l = y_BAQ_norm[y_BAQ_norm['Loudspeaker_layout'] == 'Distance Dist.']
 data_group3l = y_BAQ_norm[y_BAQ_norm['Loudspeaker_layout'] == 'Mixed Dist.']
 data_group4l = y_BAQ_norm[y_BAQ_norm['Loudspeaker_layout'] == 'Reference']
-result = stats.kruskal(data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ)
+result = stats.friedmanchisquare(data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ)
 print(result)
 #for Excerpt
 data_group1e = y_BAQ_norm[y_BAQ_norm['Excerpt'] == 'Poorly Corr.']
 data_group2e = y_BAQ_norm[y_BAQ_norm['Excerpt'] == 'Transient']
 data_group3e = y_BAQ_norm[y_BAQ_norm['Excerpt'] == 'Highly Corr.(P)']
 data_group4e = y_BAQ_norm[y_BAQ_norm['Excerpt'] == 'Highly Corr.(J)']
-result = stats.kruskal(data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
+result = stats.friedmanchisquare(data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
 print(result)
 
-#A:B
-result = stats.kruskal(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ,data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ)
-print(result)
-#A:C
-result = stats.kruskal(data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ,data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ)
-print(result)
-#B:C
-result = stats.kruskal(data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ,data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
-print(result)
-#A:B:C
-result = stats.kruskal(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ,data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ,data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
-print(result)
+# #A:B
+# result = stats.friedmanchisquare(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ,data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ)
+# print(result)
+# #A:C
+# result = stats.friedmanchisquare(data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ,data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ)
+# print(result)
+# #B:C
+# result = stats.friedmanchisquare(data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ,data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
+# print(result)
+# #A:B:C
+# result = stats.friedmanchisquare(data_group1c.BAQ, data_group2c.BAQ,data_group3c.BAQ,data_group1l.BAQ, data_group2l.BAQ,data_group3l.BAQ,data_group4l.BAQ,data_group1e.BAQ, data_group2e.BAQ,data_group3e.BAQ,data_group4e.BAQ)
+# print(result)
 
 
 
@@ -350,8 +378,8 @@ print(result)
 result=mannwhitneyu(groupC.BAQ,groupD.BAQ,alternative='two-sided',method='exact')
 print(result)
 #%% Linear mixed effect model 
-
-mdf = smf.mixedlm("""BAQ ~ -1 + C(Loudspeaker_layout)""", y_BAQ_norm,groups="Listener").fit()
+model =smf.mixedlm("""BAQ ~ -1 + C(Loudspeaker_layout)""", y_BAQ_norm,groups="Listener")
+mdf = model.fit()
 
 
 print(mdf.summary())
@@ -370,11 +398,48 @@ ax.set_xlabel("Residuals")
 
 ## Q-Q PLot
 
-fig = plt.figure(figsize = (16, 9))
+fig2 = plt.figure(figsize = (16, 9))
 ax = fig.add_subplot(111)
 sm.qqplot(mdf.resid, dist = stats.norm, line = 's', ax = ax)
 
 ax.set_title("Q-Q Plot")
+
+mdf1 = smf.mixedlm("""Envelopment~ -1 + C(Loudspeaker_layout)""", y_Env_norm,groups="Listener").fit()
+
+#%%
+print(mdf1.summary())
+fig = plt.figure(figsize = (16, 9))
+
+ax = sns.distplot(mdf1.resid, hist = False, kde_kws = {"shade" : True, "lw": 1}, fit = stats.norm)
+
+ax.set_title("KDE Plot of Model Residuals (Blue) and Normal Distribution (Black)")
+ax.set_xlabel("Residuals")
+
+## Q-Q PLot
+
+fig = plt.figure(figsize = (16, 9))
+ax = fig.add_subplot(111)
+
+sm.qqplot(mdf1.resid, dist = stats.norm, line = 's', ax = ax)
+
+ax.set_title("Q-Q Plot")
+
+    #%% Correlation analysis
+def correlation(x,y):
+    correlation = y.corr(x)
+    print(correlation)
+    plt.scatter(x, y)
+    plt.plot(np.unique(x), np.poly1d(np.polyfit(x, y, 1))
+             (np.unique(x)), color='red')
+    plt.show()
+##BAQ and Azimuth error
+correlation(dataBAQ_label_melt['Azimuth Error'],dataBAQ_label_melt.BAQ)
+##BAQ and Distance error
+correlation(dataBAQ_label_melt['Distance Error'],dataBAQ_label_melt.BAQ)
+##Env and Azimuth error
+correlation(data_label_melt['Azimuth Error'],data_label_melt.Envelopment)
+##Env and Distance error
+correlation(data_label_melt['Distance Error'],data_label_melt.Envelopment)
 #%% Export data to .txt
 data = y_Env
 data['BAQ'] = y_BAQ['BAQ']
