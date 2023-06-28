@@ -37,7 +37,7 @@ for i=1:5:size(reference,2)*5;
             step = 15;
         case 12
             channel_zone = [30 90];
-            step = [15 45]; % [el0, el28]
+            step = [15 45]; % [el0, el30]
         otherwise
             msg = 'elevation not available in VRlab';
             error(msg)
@@ -111,10 +111,11 @@ for i=1:5:size(reference,2)*5;
             version2(4:5,2) = tmp; % sorted in descending order, just assign (4) to Left Surround and (5) to Right Surround
             
             % check if there is 105 angle (not available in the VRlab)
-            for j=1:5
-            if abs(version2(j,2)) == 105
-             op=randi([-1 1]);
-             version2(j,2) = version2(j,2) + op*15;
+            for g=1:5
+            if abs(version2(g,2)) == 105
+              idx =randi([1 2]);
+             op=[-1 1];
+             version2(g,2) = version2(g,2) + op(idx)*15;
             end
             end
         case 12
@@ -127,15 +128,16 @@ for i=1:5:size(reference,2)*5;
             [tmp] = chn3mapping(version2(1,2), version2(2,2), version2(3,2), step(stepidx));
             version2(1:3,2) = tmp([1 3 2]);
                % check if there is 105 angle (not available in the VRlab)
-            for j=1:12
-            if abs(version2(j,2)) == 105
-             op=randi([-1 1]);
-             version2(j,2) = version2(j,2) + op*15;
+            for g=1:12
+            if abs(version2(g,2)) == 105
+              idx =randi([1 2]);
+             op=[-1 1];
+             version2(g,2) = version2(g,2) + op(idx)*15;
             end
             end
             
             if abs(version2(11,2)) == 165
-                version2(11,2) = 150
+                version2(11,2) = 150;
             elseif abs(version2(12,2)) == 165
                 version2(12,2) = -150;
             end
@@ -189,30 +191,24 @@ for i=1:5:size(reference,2)*5;
          %step for different elevation angle. Do this inside the j loop,
          %because in 12 channel there is different elevation with different
          %step size
-      switch channels
+          switch channels
              case 2
                   stepidx = 1;
              case 5
                   stepidx = 1;
              case 12
-                 switch version4(j,3)
+                 switch version2(j,3)
                      %Init() parameters
                      case 0
                          stepidx = 1;
-                     case abs(28)
+                     case abs(30)
                          stepidx = 2;
-                     case abs(56)
-                         stepidx = 3;
-                     case abs(80)
-                         stepidx = 4;                         
-                     otherwise
-                          stepidx = 1;
                  end
          end
         %1.  Angle Distortion
         
         %1a. define an array of possible speaker positions
-        arrayAzimuths = ((version1(j,2)-channel_zone(stepidx)+step(stepidx)):step(stepidx):(version1(j,2)+channel_zone-step(stepidx)));
+        arrayAzimuths = ((version1(j,2)-channel_zone(stepidx)+step(stepidx)):step(stepidx):(version1(j,2)+channel_zone(stepidx)-step(stepidx)));
         %1b. select a random element from array
         idx = randi([1,length(arrayAzimuths)]);
         %1c. assign speaker position to output array
@@ -246,6 +242,15 @@ for i=1:5:size(reference,2)*5;
             [tmp] = chn3mapping(version4(1,2) , version4(2,2), version4(3,2), step(stepidx));
             version4(1:3,2) = tmp([1 3 2]);
             
+            % check if there is 105 angle (not available in the VRlab)
+            for g=1:5
+            if abs(version4(g,2)) == 105
+              idx =randi([1 2]);
+             op=[-1 1];
+             version4(g,2) = version4(g,2) + op(idx)*15;
+            end
+            end
+            
             % Ch 4 must be greater than Chn 5
             tmp = sort(version4(4:5,2), 'descend');
             version4(4:5,2) = tmp; % sorted in descending order, just assign (4) to Left Surround and (5) to Right Surround
@@ -258,7 +263,14 @@ for i=1:5:size(reference,2)*5;
             % Delta Ch 2-3 must at least the step size
             [tmp] = chn3mapping(version4(1,2), version4(2,2), version4(3,2), step(stepidx));
             version4(1:3,2) = tmp([1 3 2]);
-            
+            % check if there is 105 angle (not available in the VRlab)
+            for g=1:12
+            if abs(version4(g,2)) == 105
+             idx =randi([1 2]);
+             op=[-1 1];
+             version4(g,2) = version4(g,2) + op(idx)*15;
+            end
+            end
             % Ch 4 must be greater than Chn 5
             tmp = sort(version4(5:6,2), 'descend');
             version4(5:6,2) = tmp; % sorted in descending order, just assign (5) to Left Surround Rear and (6) to Right Surround Rear
@@ -277,10 +289,10 @@ for i=1:5:size(reference,2)*5;
             %(12) to Upper Right Surround Near
             
              
-            if abs(version2(11,2)) == 165
-                version2(11,2) = 150
-            elseif abs(version2(12,2)) == 165
-                version2(12,2) = -150;
+            if abs(version4(11,2)) == 165
+                version4(11,2) = 150
+            elseif abs(version4(12,2)) == 165
+                version4(12,2) = -150;
             end
         otherwise
             msg = 'Channel format may not be supported.';

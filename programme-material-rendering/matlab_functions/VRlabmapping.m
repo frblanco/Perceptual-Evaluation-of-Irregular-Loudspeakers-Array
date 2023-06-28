@@ -15,7 +15,7 @@ function [avil_file] =VRlabmapping(placementArray,dmixFormat, stimulusName)
 %% AVIL channel map
 %Here we have the VRlab channel map with Channel_id, Azimuth and Elevation
 
-load('VR-lab\VRlab_channel_map.txt');
+load('VR-lab_info\VRlab_channel_map.txt');
 
 %% Importing audio file as an array
 c=1;

@@ -2,12 +2,12 @@ clc
 clear all
 load handel.mat
 % Adding paths
-addpath('data','inAudio__downmixes\12ch_dmw-final','inAudio__64chn__downmixes','matlab_functions','data','reference_positions')
+addpath('data','inAudio__downmixes\12ch_dmw-final','inAudio__64chn__downmixes','matlab_functions','reference_positions','VR-lab_info')
 
 %% Creating structure with reference layouts
-reference2chn = table2array(readtable('VR-lab\2.0__reference.txt'));
-reference5chn = table2array(readtable('VR-lab\5.0__reference.txt'));
-reference12chn = table2array(readtable('VR-lab\7.1.4__reference.txt'));
+reference2chn = table2array(readtable('VR-lab_info\2.0__reference.txt'));
+reference5chn = table2array(readtable('VR-lab_info\5.0__reference.txt'));
+reference12chn = table2array(readtable('VR-lab_info\7.1.4__reference.txt'));
 arrayname ={'reference2chn','reference5chn','reference12chn'};
 names ={reference2chn,reference5chn,reference12chn};
 field1 = 'name';  value1 = arrayname;
@@ -18,7 +18,7 @@ reference = struct(field1,value1,field2,value2);
 %% 
 maxdistance = 2;
 placementarray = randompos_VRlab(reference,maxdistance);
-save('placementArray16.04.mat');
+save('placementArray28.06.mat');
 
 
 %% Defining files and formats to render
