@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue May 16 20:30:23 2023
+updated on Wed Aug 30th 15:22:23 2023
 
 @author: FEIG
 """
@@ -12,7 +12,6 @@ import pandas as pd
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels as sms
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.formula.api import ols
@@ -23,6 +22,8 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy.stats import shapiro
 from scipy.stats import mannwhitneyu
 from bioinfokit.analys import stat
+import pingouin as pg
+import statsmodels as sms
 
 def normalize(arr):
     norm_arr = []
@@ -33,7 +34,7 @@ def normalize(arr):
     return norm_arr
 
 #% Data reading
-os.chdir(r"C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects-backlog-sp\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array\Development\Special-Project\Result-Analysis\Data Analysis")
+os.chdir(r"C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array-v2\data-analysis")
 # load txt files to label all values.
 labels = np.loadtxt('naming.txt', dtype=str, delimiter=',', usecols=(0, 1, 2))
 errors = np.loadtxt('positional_error.txt', dtype=float, delimiter=',', usecols=(0, 1))
@@ -41,7 +42,7 @@ errors = np.loadtxt('positional_error.txt', dtype=float, delimiter=',', usecols=
 ###read the .txt files and create a data frame###
 ## Envelopment file ##
 #read file
-os.chdir(r'C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects-backlog-sp\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array\Development\Special-Project\Result-Analysis\Data Analysis\Envelopment')
+os.chdir(r'C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array-v2\data-analysis\Envelopment')
 filenames = [i for i in glob.glob("*.txt")]
 participants = len(filenames)
 listeners = np.arange(0, participants)
@@ -65,7 +66,7 @@ data_label_melt.rename(columns={'variable': 'Listener'}, inplace=True)
 
 ## BAQ file ##
 # absolute path, using \ and r prefix
-os.chdir(r'C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects-backlog-sp\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array\Development\Special-Project\Result-Analysis\Data Analysis\BAQ')
+os.chdir(r'C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Projects\Perceptual-Evaluation-of-Irregular-Loudspeakers-Array-v2\data-analysis\BAQ')
 filenames = [i for i in glob.glob("*.txt")]
 dataBAQ = [np.loadtxt(file, skiprows=1, delimiter=' ', max_rows=48, usecols=(3),
                       unpack=True)
@@ -82,18 +83,11 @@ dataBAQ_label_melt = pd.melt(dataBAQ_label, id_vars=[
                              'Loudspeaker_layout', 'Channel', 'Excerpt','Azimuth Error','Distance Error','Attribute'], value_vars=var, value_name='Rating')
 dataBAQ_label_melt.rename(columns={'variable': 'Listener'}, inplace=True)
 
+data_final=dataBAQ_label_melt.append(data_label_melt)
 
 
-
-presentation_order = np.array([['BAQ,Env.',
-'Env.,BAQ',
-'Env.,BAQ',
-'Env.,BAQ',
+presentation_order = np.array([['Env.,BAQ',
 'BAQ,Env.',
-'BAQ,Env.',
-'BAQ,Env.',
-'Env.,BAQ',
-'Env.,BAQ',
 'Env.,BAQ',
 'BAQ,Env.',
 'BAQ,Env.',
@@ -160,17 +154,16 @@ plt.legend()
 plt.xlabel('Listener ID')
 plt.ylim(0,100)
 plt.show()
-
 #%% Remove non-reliable subjects
-listeners_remove = [2,3,7,8,11,12,14,15]
-index_remove = len(listeners_remove)
-presentation_order =np.array([np.delete(presentation_order,listeners_remove)])
-listeners =np.array([np.delete(listeners,listeners_remove)])
+# listeners_remove = [2,3,7,8,11,12,14,15]
+# index_remove = len(listeners_remove)
+# presentation_order =np.array([np.delete(presentation_order,listeners_remove)])
+# listeners =np.array([np.delete(listeners,listeners_remove)])
 
-for f in listeners_remove:
-    data_label_melt=data_label_melt[data_label_melt.Listener != int(f)]
-    dataBAQ_label_melt=dataBAQ_label_melt[dataBAQ_label_melt.Listener != int(f)]
-    listeners =np.delete(listeners,np.where(listeners == int(f)))
+# for f in listeners_remove:
+#     data_label_melt=data_label_melt[data_label_melt.Listener != int(f)]
+#     dataBAQ_label_melt=dataBAQ_label_melt[dataBAQ_label_melt.Listener != int(f)]
+#     listeners =np.delete(listeners,np.where(listeners == int(f)))
 
 
 #%% Statistics summary
@@ -203,20 +196,20 @@ plt.ylabel('Frequency')
 plt.show()
 
 
-
-
 #%% Box plots -  Exploratory analysis
 sns.set_theme(style="whitegrid")
 ax = sns.boxplot(y='Rating', x="Loudspeaker_layout",hue='Attribute',
                  data=data_final)
+ax.axhline(y = 80,color = "red", linestyle = "dashed")
 handles, _ = ax.get_legend_handles_labels()
-handles.append(plt.axhline(y=100, c='green', linestyle='dashed', label="Reference"))
-handles.append(plt.axhline(y=0, c='red', linestyle='dashed', label="Low Anchor"))
+handles.append(plt.axhline(y=80, c='green', linestyle='dashed', label="Reference"))
+handles.append(plt.axhline(y=20, c='red', linestyle='dashed', label="Low Anchor"))
 plt.legend()
 sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
 plt.ylim(0,100)
 plt.xlabel('Loudspeaker Displacement Type')
 plt.ylabel('Attribute Rating')
+plt.show()
 #%% Participants rating behaviour/ Which excerpt did my participants missidentified the reference
 sns.set_style("whitegrid")
 
@@ -250,7 +243,6 @@ plt.ylabel('BAQ Rating')
 plt.legend(title="Programme Material")
 plt.ylim(0,100)
 plt.show()
-
 
 #%% ANOVA model
 
@@ -448,16 +440,3 @@ plt.xlabel('Loudspeaker Displacement Type')
 plt.ylabel('Azimuthal Displacement/Channel [deg/channel]')
 plt.legend(title='Loudspeaker Layout')
 plt.show()
-
-
-#%% Export data to .txt
-
-data = y_Env
-data['BAQ'] = y_BAQ['BAQ']
-
-path =r"C:\Users\feig\OneDrive - Bang & Olufsen\Next Generation Audio SA\Special Course\Three Driver Speaker arrangement to improve spatial awareness\Development\Special-Project\Result-Analysis\Data Analysis\data.txt"
-data.to_csv(path,header=True,sep=',',index=False)
-# with open(path,'a') as f:
-#     data_string = data.to_string(index=False)
-#     f.write(data_string)
-    
